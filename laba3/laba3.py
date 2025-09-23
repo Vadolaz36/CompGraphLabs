@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from math import sqrt, floor
 from PIL import Image, ImageDraw
-import os
+
 
 def sign(x):
     if x > 0:
@@ -12,9 +12,10 @@ def sign(x):
     else:
         return 0
 
-def cda(x1, y1, x2, y2, canvas, color):
+
+def DrawingLines(x1, y1, x2, y2, Canvas, color):
     if abs(x1 - x2) < 0.1 and abs(y1 - y2) < 0.1:
-        canvas.create_rectangle(x1, y1, x1+1, y1+1, fill=color, outline=color)
+        Canvas.create_rectangle(x1, y1, x1 + 1, y1 + 1, fill=color, outline=color)
         return
 
     dx = x2 - x1
@@ -35,14 +36,14 @@ def cda(x1, y1, x2, y2, canvas, color):
     y = y1 + 0.5 * sign(dy)
 
     for i in range(int(l) + 1):
-        canvas.create_rectangle(floor(x), floor(y), floor(x)+1, floor(y)+1, fill=color, outline=color)
+        Canvas.create_rectangle(floor(x), floor(y), floor(x) + 1, floor(y) + 1, fill=color, outline=color)
         x = x + dx
         y = y + dy
 
 
-def brezf(x1, y1, x2, y2, canvas, color):
+def BrezenhemFloat(x1, y1, x2, y2, Canvas, color):
     if abs(x1 - x2) < 0.1 and abs(y1 - y2) < 0.1:
-        canvas.create_rectangle(x1, y1, x1+1, y1+1, fill=color, outline=color)
+        Canvas.create_rectangle(x1, y1, x1 + 1, y1 + 1, fill=color, outline=color)
         return
 
     sx = sign(x2 - x1)
@@ -69,7 +70,7 @@ def brezf(x1, y1, x2, y2, canvas, color):
     steps = int(dx) + 1
 
     for i in range(steps):
-        canvas.create_rectangle(int(x), int(y), int(x)+1, int(y)+1, fill=color, outline=color)
+        Canvas.create_rectangle(int(x), int(y), int(x) + 1, int(y) + 1, fill=color, outline=color)
 
         if f >= 0:
             if flag == 1:
@@ -86,11 +87,11 @@ def brezf(x1, y1, x2, y2, canvas, color):
         f = f + dy / dx
 
 
-def brezi(x1, y1, x2, y2, canvas, color):
+def BrezenhemInteger(x1, y1, x2, y2, Canvas, color):
     x1, y1, x2, y2 = int(round(x1)), int(round(y1)), int(round(x2)), int(round(y2))
 
     if x1 == x2 and y1 == y2:
-        canvas.create_rectangle(x1, y1, x1+1, y1+1, fill=color, outline=color)
+        Canvas.create_rectangle(x1, y1, x1 + 1, y1 + 1, fill=color, outline=color)
         return
 
     sx = sign(x2 - x1)
@@ -115,7 +116,7 @@ def brezi(x1, y1, x2, y2, canvas, color):
     f = 2 * dy - dx
 
     for i in range(dx + 1):
-        canvas.create_rectangle(x, y, x+1, y+1, fill=color, outline=color)
+        Canvas.create_rectangle(x, y, x + 1, y + 1, fill=color, outline=color)
 
         if f >= 0:
             if flag == 1:
@@ -132,11 +133,11 @@ def brezi(x1, y1, x2, y2, canvas, color):
         f = f + 2 * dy
 
 
-def draw_line_builtin(x1, y1, x2, y2, canvas, color):
-    canvas.create_line(x1, y1, x2, y2, fill=color, width=1)
+def draw_line_builtin(x1, y1, x2, y2, Canvas, color):
+    Canvas.create_line(x1, y1, x2, y2, fill=color, width=1)
 
 
-def cda_pil(x1, y1, x2, y2, draw, color):
+def DrawingLines_pil(x1, y1, x2, y2, draw, color):
     if abs(x1 - x2) < 0.1 and abs(y1 - y2) < 0.1:
         draw.point((x1, y1), fill=color)
         return
@@ -164,7 +165,7 @@ def cda_pil(x1, y1, x2, y2, draw, color):
         y = y + dy
 
 
-def brezf_pil(x1, y1, x2, y2, draw, color):
+def BrezenhemFloat_pil(x1, y1, x2, y2, draw, color):
     if abs(x1 - x2) < 0.1 and abs(y1 - y2) < 0.1:
         draw.point((x1, y1), fill=color)
         return
@@ -210,7 +211,7 @@ def brezf_pil(x1, y1, x2, y2, draw, color):
         f = f + dy / dx
 
 
-def brezi_pil(x1, y1, x2, y2, draw, color):
+def BrezenhemInteger_pil(x1, y1, x2, y2, draw, color):
     x1, y1, x2, y2 = int(round(x1)), int(round(y1)), int(round(x2)), int(round(y2))
 
     if x1 == x2 and y1 == y2:
@@ -272,13 +273,13 @@ def create_rhombus():
             messagebox.showerror("Ошибка", "Длина диагонали должна быть положительной")
             return
 
-        canvas.delete("all")
+        Canvas.delete("all")
 
         offsets = [(0, 0), (3, 3), (6, 6), (9, 9)]
         algorithms = [
-            ("ЦДА", "blue", cda),
-            ("Брезенхем (вещ.)", "red", brezf),
-            ("Брезенхем (цел.)", "green", brezi),
+            ("ЦДА", "blue", DrawingLines),
+            ("Брезенхем (вещ.)", "red", BrezenhemFloat),
+            ("Брезенхем (цел.)", "green", BrezenhemInteger),
             ("Встроенный", "black", draw_line_builtin)
         ]
 
@@ -316,12 +317,12 @@ def create_rhombus():
             x4 = center_rhomb_x - perp_dx
             y4 = center_rhomb_y - perp_dy
 
-            algorithm_func(shifted_x1, shifted_y1, x3, y3, canvas, color)
-            algorithm_func(x3, y3, shifted_x2, shifted_y2, canvas, color)
-            algorithm_func(shifted_x2, shifted_y2, x4, y4, canvas, color)
-            algorithm_func(x4, y4, shifted_x1, shifted_y1, canvas, color)
+            algorithm_func(shifted_x1, shifted_y1, x3, y3, Canvas, color)
+            algorithm_func(x3, y3, shifted_x2, shifted_y2, Canvas, color)
+            algorithm_func(shifted_x2, shifted_y2, x4, y4, Canvas, color)
+            algorithm_func(x4, y4, shifted_x1, shifted_y1, Canvas, color)
 
-            canvas.create_text(250, 350 + i * 20, text=algorithm_name, fill=color, font=("Arial", 8))
+            Canvas.create_text(250, 350 + i * 20, text=algorithm_name, fill=color, font=("Arial", 8))
 
     except ValueError:
         messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
@@ -335,11 +336,9 @@ def save_image():
         )
 
         if file_path:
-            # Создаем изображение PIL
             image = Image.new('RGB', (600, 400), 'white')
             draw = ImageDraw.Draw(image)
 
-            # Получаем параметры ромба
             x1 = float(entry_x1.get())
             y1 = float(entry_y1.get())
             x2 = float(entry_x2.get())
@@ -354,9 +353,9 @@ def save_image():
             }
 
             algorithms_pil = [
-                ("ЦДА", "blue", cda_pil),
-                ("Брезенхем (вещ.)", "red", brezf_pil),
-                ("Брезенхем (цел.)", "green", brezi_pil),
+                ("ЦДА", "blue", DrawingLines_pil),
+                ("Брезенхем (вещ.)", "red", BrezenhemFloat_pil),
+                ("Брезенхем (цел.)", "green", BrezenhemInteger_pil),
                 ("Встроенный", "black", draw_line_builtin_pil)
             ]
 
@@ -404,10 +403,10 @@ def save_image():
 
 
 root = tk.Tk()
-root.title("Form1")
+root.title("Растеризация отрезков прямых")
 root.geometry("600x500")
 
-title_label = tk.Label(root, text="Растеризация отрезков прямых", font=("Arial", 14, "bold"))
+title_label = tk.Label(root, text="Растеризация отрезков прямых (вариант с ромбами)", font=("Arial", 14, "bold"))
 title_label.pack(pady=5)
 
 input_frame = tk.Frame(root)
@@ -449,7 +448,7 @@ btn_save = tk.Button(button_frame, text="Сохранить", command=save_image
                      width=10, height=1)
 btn_save.pack(side=tk.LEFT, padx=10)
 
-canvas = tk.Canvas(root, width=600, height=400, bg="white", relief="solid", bd=1)
-canvas.pack(pady=10)
+Canvas = tk.Canvas(root, width=600, height=400, bg="white", relief="solid", bd=1)
+Canvas.pack(pady=10)
 
 root.mainloop()
