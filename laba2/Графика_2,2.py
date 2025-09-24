@@ -27,7 +27,7 @@ class ImageProcessor:
         
         # Информация о варианте
         info_label = ttk.Label(control_frame, 
-                              text="Фрагмент: КВАДРАТ из ЛЕВОГО НИЖНЕГО угла ? в ПРАВЫЙ НИЖНИЙ угол | Функция: x*sin(x)",
+                              text="Фрагмент: КВАДРАТ из ЛЕВОГО НИЖНЕГО угла → в ПРАВЫЙ НИЖНИЙ угол | Функция: x*sin(x)",
                               font=("Arial", 10, "bold"))
         info_label.pack(pady=5)
         
@@ -66,7 +66,7 @@ class ImageProcessor:
         ttk.Button(buttons_frame, text="4. Нарисовать оси и график x*sin(x)", 
                   command=self.draw_axes_graph).grid(row=0, column=3, padx=5, pady=2)
         
-        ttk.Button(buttons_frame, text="5. Сохранить результат", 
+        ttk.Button(buttons_frame, text="5. Сохранить результат в BMP", 
                   command=self.save_result).grid(row=0, column=4, padx=5, pady=2)
         
         # Области для изображений
@@ -297,21 +297,17 @@ class ImageProcessor:
             return
         
         file_path = filedialog.asksaveasfilename(
-            title="Сохранить результат",
-            defaultextension=".png",
-            filetypes=[
-                ("PNG files", "*.png"), 
-                ("JPEG files", "*.jpg"), 
-                ("BMP files", "*.bmp"),
-                ("All files", "*.*")
-            ]
+            title="Сохранить результат в формате BMP",
+            defaultextension=".bmp",
+            filetypes=[("BMP files", "*.bmp")]
         )
         
         if file_path:
             try:
-                self.result_image.save(file_path)
+                # Сохраняем в формате BMP
+                self.result_image.save(file_path, format='BMP')
                 messagebox.showinfo("Успех", f"Изображение сохранено как {file_path}")
-                self.info_label.config(text=f"Изображение сохранено: {file_path}")
+                self.info_label.config(text=f"Изображение сохранено в формате BMP: {file_path}")
             except Exception as e:
                 messagebox.showerror("Ошибка", f"Не удалось сохранить: {str(e)}")
     
