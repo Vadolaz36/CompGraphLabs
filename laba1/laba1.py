@@ -67,11 +67,11 @@ class ImageProcessor:
         self.processed_label = tk.Label(image_frame, text="Обработанное изображение", font=("Times New Roman", 10))
         self.processed_label.grid(row=0, column=1, pady=5)
 
-        self.original_canvas = tk.Canvas(image_frame, width=350, height=350, bg="white", relief=tk.SUNKEN)
-        self.original_canvas.grid(row=1, column=0, padx=10)
+        self.original_Canvas = tk.Canvas(image_frame, width=350, height=350, bg="white", relief=tk.SUNKEN)
+        self.original_Canvas.grid(row=1, column=0, padx=10)
 
-        self.processed_canvas = tk.Canvas(image_frame, width=350, height=350, bg="white", relief=tk.SUNKEN)
-        self.processed_canvas.grid(row=1, column=1, padx=10)
+        self.processed_Canvas = tk.Canvas(image_frame, width=350, height=350, bg="white", relief=tk.SUNKEN)
+        self.processed_Canvas.grid(row=1, column=1, padx=10)
 
         self.status_var = tk.StringVar()
         self.status_var.set("Готов к работе")
@@ -93,7 +93,7 @@ class ImageProcessor:
             try:
                 self.image = Image.open(file_path).convert('RGB')
                 self.processed_image = None
-                self.display_image(self.image, self.original_canvas)
+                self.display_image(self.image, self.original_Canvas)
 
                 self.process_btn.config(state=tk.NORMAL)
                 self.save_btn.config(state=tk.DISABLED)
@@ -115,7 +115,7 @@ class ImageProcessor:
                 pixels[width // 2, 0] = (127, 255, 127)
                 pixels[0, height - 1] = (127, 127, 255)
 
-                self.display_image(self.processed_image, self.processed_canvas)
+                self.display_image(self.processed_image, self.processed_Canvas)
 
                 self.save_btn.config(state=tk.NORMAL)
                 self.save_pbm_btn.config(state=tk.NORMAL)
@@ -185,7 +185,7 @@ class ImageProcessor:
                         byte = 0
                         bit_count = 0
 
-    def display_image(self, image, canvas):
+    def display_image(self, image, Canvas):
         width, height = image.size
         max_size = 350
 
@@ -201,8 +201,8 @@ class ImageProcessor:
             display_image = image
 
         self.photo = ImageTk.PhotoImage(display_image)
-        canvas.delete("all")
-        canvas.create_image(175, 175, anchor=tk.CENTER, image=self.photo)
+        Canvas.delete("all")
+        Canvas.create_image(175, 175, anchor=tk.CENTER, image=self.photo)
 
 def main():
     root = tk.Tk()
