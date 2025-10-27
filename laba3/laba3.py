@@ -262,8 +262,8 @@ def DrawLineBuiltin_pil(x1, y1, x2, y2, draw, color):
     draw.line([(x1, y1), (x2, y2)], fill=color, width=1)
 
 
-current_segments = []  
-current_mode = "rhombus" 
+current_segments = []
+current_mode = "rhombus"
 
 
 def ParseSvgFile(file_path):
@@ -299,27 +299,26 @@ def ParseSvgFile(file_path):
         return []
 
 
-def SaveAsPbm(image, file_path):
+def SaveAsPpm(image, file_path):
     try:
-        bw_image = image.convert('1')
-        width, height = bw_image.size
+        width, height = image.size
+        pixels = image.load()
 
         with open(file_path, 'w') as f:
-            f.write("P1\n")
+            f.write("P3\n")
             f.write(f"# Created by Line Rasterization App\n")
             f.write(f"{width} {height}\n")
+            f.write("255\n")
 
-            pixels = bw_image.load()
             for y in range(height):
-                line = []
                 for x in range(width):
-                    pixel = 1 if pixels[x, y] == 255 else 0
-                    line.append(str(pixel))
-                f.write(" ".join(line) + "\n")
+                    r, g, b = pixels[x, y]
+                    f.write(f"{r} {g} {b} ")
+                f.write("\n")
 
         return True
     except Exception as e:
-        messagebox.showerror("Ошибка", f"Не удалось сохранить PBM файл: {str(e)}")
+        messagebox.showerror("Ошибка", f"Не удалось сохранить PPM файл: {str(e)}")
         return False
 
 
@@ -391,7 +390,7 @@ def LoadSvg():
 
     Canvas.delete("all")
 
-    offsets = [(0, 0), (15, 0), (0, 15), (15, 15)]
+    offsets = [(0, 0), (3, 0), (0, 3), (3, 3)]
     algorithms = [
         ("ЦДА", "blue", DigitalDifferentialAnalyzer),
         ("Брезенхем (вещ.)", "red", BrezenhemFloat),
@@ -419,12 +418,12 @@ def CreateRhombus():
             messagebox.showerror("Ошибка", "Длина диагонали должна быть положительной")
             return
 
-        current_segments = [(x1, y1, x2, y2, other_diag_len)]  # храним параметры ромба
+        current_segments = [(x1, y1, x2, y2, other_diag_len)]
         current_mode = "rhombus"
 
         Canvas.delete("all")
 
-        offsets = [(0, 0), (15, 0), (0, 15), (15, 15)]
+        offsets = [(0, 0), (3, 0), (0, 3), (3, 3)]
         algorithms = [
             ("ЦДА", "blue", DigitalDifferentialAnalyzer),
             ("Брезенхем (вещ.)", "red", BrezenhemFloat),
@@ -441,12 +440,12 @@ def CreateRhombus():
         messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
 
 
-def SaveToPbm():
+def SaveToPpm():
     global current_segments, current_mode
 
     file_path = filedialog.asksaveasfilename(
-        defaultextension=".pbm",
-        filetypes=[("PBM files", "*.pbm"), ("All files", "*.*")]
+        defaultextension=".ppm",
+        filetypes=[("PPM files", "*.ppm"), ("All files", "*.*")]
     )
 
     if not file_path:
@@ -456,36 +455,65 @@ def SaveToPbm():
         image = Image.new('RGB', (600, 400), 'white')
         draw = ImageDraw.Draw(image)
 
-        color_pbm = (0, 0, 0)
+        colors_ppm = [
+            (0, 0, 255),
+            (255, 0, 0),
+            (0, 255, 0),
+            (0, 0, 0)
+        ]
 
-        algorithm_func = DigitalDifferentialAnalyzer_pil
+        algorithms = [
+            DigitalDifferentialAnalyzer_pil,
+            BrezenhemFloat_pil,
+            BrezenhemInteger_pil,
+            DrawLineBuiltin_pil
+        ]
+
+        offsets = [(0, 0), (3, 0), (0, 3), (3, 3)]
 
         if current_mode == "rhombus" and current_segments:
             x1, y1, x2, y2, other_diag_len = current_segments[0]
-            DrawRhombusOnImage(image, draw, x1, y1, x2, y2, other_diag_len, algorithm_func, color_pbm)
+
+            for i, (offset_x, offset_y) in enumerate(offsets):
+                algorithm_func = algorithms[i]
+                color = colors_ppm[i]
+                DrawRhombusOnImage(image, draw, x1, y1, x2, y2, other_diag_len, algorithm_func, color, offset_x,
+                                   offset_y)
 
         elif current_mode == "svg" and current_segments:
-            DrawSegmentsOnImage(image, draw, current_segments, algorithm_func, color_pbm)
+            for i, (offset_x, offset_y) in enumerate(offsets):
+                algorithm_func = algorithms[i]
+                color = colors_ppm[i]
+                DrawSegmentsOnImage(image, draw, current_segments, algorithm_func, color, offset_x, offset_y)
 
-        if SaveAsPbm(image, file_path):
+        if SaveAsPpm(image, file_path):
             messagebox.showinfo("Успех", f"Изображение сохранено как {file_path}")
 
     except Exception as e:
         messagebox.showerror("Ошибка", f"Не удалось сохранить изображение: {str(e)}")
 
 
-def DrawSegmentsOnImage(image, draw, segments, algorithm_func, color):
+def DrawSegmentsOnImage(image, draw, segments, algorithm_func, color, offset_x=0, offset_y=0):
     for segment in segments:
         x1, y1, x2, y2 = segment
-        algorithm_func(x1, y1, x2, y2, draw, color)
+        shifted_x1 = x1 + offset_x
+        shifted_y1 = y1 + offset_y
+        shifted_x2 = x2 + offset_x
+        shifted_y2 = y2 + offset_y
+        algorithm_func(shifted_x1, shifted_y1, shifted_x2, shifted_y2, draw, color)
 
 
-def DrawRhombusOnImage(image, draw, x1, y1, x2, y2, other_diag_len, algorithm_func, color):
-    center_x = (x1 + x2) / 2
-    center_y = (y1 + y2) / 2
+def DrawRhombusOnImage(image, draw, x1, y1, x2, y2, other_diag_len, algorithm_func, color, offset_x=0, offset_y=0):
+    shifted_x1 = x1 + offset_x
+    shifted_y1 = y1 + offset_y
+    shifted_x2 = x2 + offset_x
+    shifted_y2 = y2 + offset_y
 
-    dx = x2 - x1
-    dy = y2 - y1
+    center_x = (shifted_x1 + shifted_x2) / 2
+    center_y = (shifted_y1 + shifted_y2) / 2
+
+    dx = shifted_x2 - shifted_x1
+    dy = shifted_y2 - shifted_y1
     diag1_len = sqrt(dx * dx + dy * dy)
 
     if diag1_len < 0.1:
@@ -506,10 +534,10 @@ def DrawRhombusOnImage(image, draw, x1, y1, x2, y2, other_diag_len, algorithm_fu
     x4 = center_x - perp_dx
     y4 = center_y - perp_dy
 
-    algorithm_func(x1, y1, x3, y3, draw, color)
-    algorithm_func(x3, y3, x2, y2, draw, color)
-    algorithm_func(x2, y2, x4, y4, draw, color)
-    algorithm_func(x4, y4, x1, y1, draw, color)
+    algorithm_func(shifted_x1, shifted_y1, x3, y3, draw, color)
+    algorithm_func(x3, y3, shifted_x2, shifted_y2, draw, color)
+    algorithm_func(shifted_x2, shifted_y2, x4, y4, draw, color)
+    algorithm_func(x4, y4, shifted_x1, shifted_y1, draw, color)
 
 
 root = tk.Tk()
@@ -556,8 +584,8 @@ btn_create.pack(side=tk.LEFT, padx=5)
 btn_LoadSvg = tk.Button(button_frame, text="Загрузить SVG", command=LoadSvg, width=12, height=1)
 btn_LoadSvg.pack(side=tk.LEFT, padx=5)
 
-btn_save_pbm = tk.Button(button_frame, text="Сохранить PBM", command=SaveToPbm, width=12, height=1)
-btn_save_pbm.pack(side=tk.LEFT, padx=5)
+btn_save_ppm = tk.Button(button_frame, text="Сохранить PPM", command=SaveToPpm, width=12, height=1)
+btn_save_ppm.pack(side=tk.LEFT, padx=5)
 
 Canvas = tk.Canvas(root, width=600, height=400, bg="white", relief="solid", bd=1)
 Canvas.pack(pady=10)
