@@ -479,7 +479,7 @@ def SaveToPpm():
                 color = colors_ppm[i]
                 DrawRhombusOnImage(image, draw, x1, y1, x2, y2, other_diag_len, algorithm_func, color, offset_x,
                                    offset_y)
-
+#
         elif current_mode == "svg" and current_segments:
             for i, (offset_x, offset_y) in enumerate(offsets):
                 algorithm_func = algorithms[i]
