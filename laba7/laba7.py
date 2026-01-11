@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk, ImageFilter
+import numpy as np
 
 
 class ImageFilterLab:
@@ -95,13 +96,28 @@ class ImageFilterLab:
     def open_image(self):
         file_path = filedialog.askopenfilename(
             title="Выберите изображение",
-            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp *.tiff")]
+            filetypes=[
+                ("Все поддерживаемые", "*.jpg *.jpeg *.png *.bmp *.tiff *.pbm *.pgm *.ppm"),
+                ("JPEG", "*.jpg *.jpeg"),
+                ("PNG", "*.png"),
+                ("BMP", "*.bmp"),
+                ("TIFF", "*.tiff"),
+                ("PNM (PBM/PGM/PPM)", "*.pbm *.pgm *.ppm"),
+                ("Все файлы", "*.*")
+            ]
         )
 
         if file_path:
             try:
                 self.original_image = Image.open(file_path)
-                if self.original_image.mode != 'RGB':
+
+                if self.original_image.mode == '1':
+                    self.original_image = self.original_image.convert('L').convert('RGB')
+                elif self.original_image.mode == 'L':
+                    self.original_image = self.original_image.convert('RGB')
+                elif self.original_image.mode == 'P':
+                    self.original_image = self.original_image.convert('RGB')
+                elif self.original_image.mode == 'RGBA':
                     self.original_image = self.original_image.convert('RGB')
 
                 self.display_image(self.original_image, self.original_label)
@@ -313,7 +329,13 @@ class ImageFilterLab:
         file_path = filedialog.asksaveasfilename(
             title="Сохранить уменьшение без ФНЧ",
             defaultextension=".png",
-            filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")]
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("BMP files", "*.bmp"),
+                ("PNM files", "*.pbm *.pgm *.ppm"),
+                ("All files", "*.*")
+            ]
         )
 
         if file_path:
@@ -331,7 +353,13 @@ class ImageFilterLab:
         file_path = filedialog.asksaveasfilename(
             title="Сохранить уменьшение с ФНЧ",
             defaultextension=".png",
-            filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")]
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("BMP files", "*.bmp"),
+                ("PNM files", "*.pbm *.pgm *.ppm"),
+                ("All files", "*.*")
+            ]
         )
 
         if file_path:
@@ -349,7 +377,13 @@ class ImageFilterLab:
         file_path = filedialog.asksaveasfilename(
             title="Сохранить комбинированный ФВЧ",
             defaultextension=".png",
-            filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")]
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("BMP files", "*.bmp"),
+                ("PNM files", "*.pbm *.pgm *.ppm"),
+                ("All files", "*.*")
+            ]
         )
 
         if file_path:
@@ -360,6 +394,11 @@ class ImageFilterLab:
                 messagebox.showerror("Ошибка", f"Ошибка при сохранении: {str(e)}")
 
 
-root = tk.Tk()
-app = ImageFilterLab(root)
-root.mainloop()
+def main():
+    root = tk.Tk()
+    app = ImageFilterLab(root)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
